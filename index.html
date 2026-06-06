@@ -408,10 +408,10 @@
 
 <!-- SPLASH -->
 <div id="splash">
-  <div class="splash-icon">🥶</div>
-  <h2>NO PLAYLIST LOADED</h2>
-  <p>Click <b>Load Playlist</b> above to import your Mp3tag export.<br/>Only supports the personal HTML and CSV · TSV exports, created on the software.</p>
-  <button class="splash-btn" onclick="document.getElementById('toggleImport').click()">Load Playlist</button>
+  <div class="splash-icon" id="splashIcon">🥶</div>
+  <h2 id="splashTitle">NO PLAYLIST LOADED</h2>
+  <p id="splashMsg">Click <b>Load Playlist</b> above to import your Mp3tag export.<br/>Only supports the personal HTML and CSV · TSV exports, created on the software.</p>
+  <button class="splash-btn" id="splashBtn" onclick="document.getElementById('toggleImport').click()">Load Playlist</button>
 </div>
 
 <!-- TABLE (hidden until data loaded) -->
@@ -843,7 +843,7 @@ async function autoLoad() {
   }
 }
 
-autoLoad();
+document.addEventListener('DOMContentLoaded', autoLoad);
 
 </script>
 </body>

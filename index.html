@@ -1,0 +1,850 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>RSF_MP3s Playlist</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700&display=swap');
+
+    :root {
+      --bg:        #1a2530;
+      --bg2:       #212f3d;
+      --surface:   #263545;
+      --surface2:  #2e3f52;
+      --accent:    #00d4ff;
+      --accent2:   #ff6b35;
+      --text:      #d4e8f7;
+      --text-dim:  #7a9bb8;
+      --border:    #334d66;
+      --odd:       #2a3c4e;
+      --even:      #243040;
+      --hover:     #3a5570;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Barlow Condensed', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: linear-gradient(135deg, #0d1a24 0%, #1a2e40 50%, #0d1a24 100%);
+      border-bottom: 2px solid var(--accent);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0,212,255,0.15);
+    }
+
+    .header-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: var(--accent);
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .header-title span { color: var(--accent2); }
+
+    .stats {
+      display: flex;
+      gap: 16px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      flex-wrap: wrap;
+    }
+    .stat-item { display: flex; flex-direction: column; gap: 1px; }
+    .stat-label { color: var(--accent); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; }
+    .stat-val   { color: var(--text); }
+
+    /* ── TOOLBAR ── */
+    .toolbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 9px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 57px;
+      z-index: 99;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 200px;
+      max-width: 440px;
+    }
+    .search-wrap::before {
+      content: '⌕';
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent);
+      font-size: 18px;
+      pointer-events: none;
+    }
+
+    #searchInput {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 15px;
+      padding: 7px 10px 7px 34px;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    #searchInput:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(0,212,255,.15); }
+    #searchInput::placeholder { color: var(--text-dim); }
+
+    .col-filter-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+    #colFilter {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px;
+      padding: 6px 10px;
+      outline: none;
+      cursor: pointer;
+    }
+    #colFilter:focus { border-color: var(--accent); }
+
+    /* import button */
+    .import-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: 1px solid var(--accent2);
+      color: var(--accent2);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      padding: 6px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: background .15s, color .15s;
+      white-space: nowrap;
+    }
+    .import-btn:hover { background: var(--accent2); color: #fff; }
+    .import-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+    .result-count {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-left: auto;
+      white-space: nowrap;
+    }
+    .result-count b { color: var(--accent); }
+
+    /* ── IMPORT PANEL ── */
+    #importPanel {
+      display: none;
+      background: #0d1a24;
+      border-bottom: 2px solid var(--accent2);
+      padding: 16px 20px;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+    #importPanel.open { display: flex; }
+
+    .import-panel-title {
+      width: 100%;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--accent2);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .import-zone {
+      flex: 1;
+      min-width: 260px;
+      border: 2px dashed var(--border);
+      border-radius: 6px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      color: var(--text-dim);
+      font-size: 14px;
+      line-height: 1.8;
+    }
+    .import-zone:hover, .import-zone.drag-over {
+      border-color: var(--accent2);
+      background: rgba(255,107,53,.06);
+      color: var(--text);
+    }
+    .import-zone big { display: block; font-size: 28px; margin-bottom: 4px; }
+    .import-zone b   { color: var(--accent2); }
+
+    .import-instructions {
+      flex: 1;
+      min-width: 260px;
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.8;
+    }
+    .import-instructions h3 { color: var(--accent); font-size: 13px; letter-spacing: 1px; margin-bottom: 6px; }
+    .import-instructions code {
+      font-family: 'Share Tech Mono', monospace;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-size: 12px;
+      color: #a0d8ef;
+    }
+    .import-instructions ol { padding-left: 18px; }
+    .import-instructions li { margin-bottom: 3px; }
+
+    #importStatus {
+      width: 100%;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      min-height: 18px;
+    }
+    #importStatus.ok  { color: #4dff91; }
+    #importStatus.err { color: #ff4d4d; }
+
+    /* ── TABLE ── */
+    .table-wrap { overflow-x: auto; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+
+    thead th {
+      background: var(--surface2);
+      color: var(--accent);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 10px 12px;
+      border-bottom: 2px solid var(--accent);
+      border-right: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+      transition: background .15s;
+    }
+    thead th:hover { background: #344d63; }
+    thead th.sort-asc  { color: #00d4ff; }
+    thead th.sort-desc { color: #ff6b35; }
+    thead th.sort-asc::after  { content: ' ▲'; font-size: 10px; }
+    thead th.sort-desc::after { content: ' ▼'; font-size: 10px; }
+
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+    tbody tr:nth-child(odd)  { background: var(--odd);  }
+    tbody tr:nth-child(even) { background: var(--even); }
+    tbody tr:hover           { background: var(--hover); }
+
+    tbody td {
+      padding: 6px 12px;
+      border-right: 1px solid rgba(51,77,102,.4);
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 260px;
+    }
+
+    tbody td:first-child {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      text-align: right;
+      width: 52px;
+    }
+    tbody td:nth-child(2) { color: var(--accent); font-weight: 600; }
+    tbody td:nth-child(5) { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #7abcd8; }
+    tbody td:nth-child(6) { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--text-dim); }
+
+    mark { background: rgba(255,107,53,.35); color: #ffcba4; border-radius: 2px; padding: 0 1px; }
+
+    .no-results { text-align: center; padding: 60px 20px; color: var(--text-dim); font-size: 16px; }
+    .no-results span { color: var(--accent); }
+
+    /* ── SPLASH (no data yet) ── */
+    #splash {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 20px;
+      gap: 16px;
+      color: var(--text-dim);
+      text-align: center;
+    }
+    #splash .splash-icon { font-size: 52px; }
+    #splash h2 { font-size: 20px; color: var(--text); letter-spacing: 2px; }
+    #splash p  { font-size: 14px; max-width: 440px; line-height: 1.7; }
+    #splash .splash-btn {
+      margin-top: 8px;
+      background: var(--accent2);
+      color: #fff;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      padding: 10px 24px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: opacity .15s;
+    }
+    #splash .splash-btn:hover { opacity: .85; }
+
+    .footer {
+      text-align: center;
+      padding: 16px;
+      font-size: 11px;
+      color: var(--text-dim);
+      border-top: 1px solid var(--border);
+      font-family: 'Share Tech Mono', monospace;
+    }
+    .footer a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-title">🧿 RSF<span>_</span>MP3'<span style="font-size:0.6em;vertical-align:0.00em;color:var(--accent)">s</span><span>🎧</span></sub></div>
+  <div class="stats" id="headerStats">
+    <div class="stat-item"><span class="stat-label">Tracks</span><span class="stat-val" id="sTracks">—</span></div>
+    <div class="stat-item"><span class="stat-label">Size</span><span class="stat-val" id="sSize">—</span></div>
+    <div class="stat-item"><span class="stat-label">Duration</span><span class="stat-val" id="sDuration">—</span></div>
+    <div class="stat-item"><span class="stat-label">Quality</span><span class="stat-val" id="sQuality">—</span></div>
+    <div class="stat-item"><span class="stat-label">Tracks Codec</span><span class="stat-val">MPEG 1 Layer III</span></div>
+    <div class="stat-item"><span class="stat-label">Written Tags</span><span class="stat-val">ID3v1 ID3v2.3</span></div>
+    <div class="stat-item"><span class="stat-label">Updated</span><span class="stat-val" id="sDate">—</span></div>
+  </div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="Search artist, title, album, genre…" autocomplete="off" spellcheck="false"/>
+  </div>
+  <div class="col-filter-wrap">
+    <label for="colFilter">in</label>
+    <select id="colFilter">
+      <option value="-1">All columns</option>
+      <option value="1">Artist</option>
+      <option value="2">Title</option>
+      <option value="3">Album</option>
+      <option value="5">Year</option>
+      <option value="6">Country</option>
+      <option value="7">Genre</option>
+    </select>
+  </div>
+  <button class="import-btn" id="toggleImport">
+    <svg viewBox="0 0 16 16"><path d="M8 1a.5.5 0 0 1 .5.5v7.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 9.293V1.5A.5.5 0 0 1 8 1zM1 13.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13a.5.5 0 0 1-.5-.5z"/></svg>
+    Load Playlist
+  </button>
+  <div class="result-count" id="resultCount"></div>
+</div>
+
+<!-- IMPORT PANEL -->
+<div id="importPanel">
+  <div class="import-panel-title">↓ Load your Mp3tag export</div>
+
+  <div class="import-zone" id="dropZone">
+    <big>📂</big>
+    <b>Click to browse</b> or drag &amp; drop<br/>
+    <small>Only supports: Mp3tag HTML · CSV · TSV personal exports </small>
+    <input type="file" id="fileInput" accept=".html,.htm,.csv,.tsv,.txt" style="display:none"/>
+  </div>
+
+  <div class="import-instructions">
+    <h3>HOW TO EXPORT FROM MP3TAG</h3>
+    <ol>
+      <li>In Mp3tag: <b>File → Export…</b></li>
+      <li>Choose <b>html</b> (the personal template)</li>
+      <li><i>— or —</i> choose <b>csv · tsv</b> for a lighter file</li>
+      <li>Load it on the left side drop zone</li>
+    </ol>
+    <br/>
+    <h3>CSV · TSV FORMATS (if you create a custom export)</h3>
+    Columns in order, semicolon-separated:<br/>
+    <code>STATS: Tracks;Size;Duration;Quality;Updater</code><br/>
+	<code>TABLE: #;Artist;Title;Album;Length;Year;Country;Genre</code><br/>
+    <small>First line can be a header row — it will be skipped automatically.</small>
+  </div>
+
+  <div id="importStatus"></div>
+</div>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-icon">🥶</div>
+  <h2>NO PLAYLIST LOADED</h2>
+  <p>Click <b>Load Playlist</b> above to import your Mp3tag export.<br/>Only supports the personal HTML and CSV · TSV exports, created on the software.</p>
+  <button class="splash-btn" onclick="document.getElementById('toggleImport').click()">Load Playlist</button>
+</div>
+
+<!-- TABLE (hidden until data loaded) -->
+<div id="tableArea" style="display:none">
+  <div class="table-wrap">
+    <table id="playlist">
+      <thead>
+        <tr>
+          <th data-col="0">#</th>
+          <th data-col="1">Artist</th>
+          <th data-col="2">Title</th>
+          <th data-col="3">Album</th>
+          <th data-col="4">Length</th>
+          <th data-col="5">Year</th>
+          <th data-col="6">Country</th>
+          <th data-col="7">Genre</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+  <div class="footer">
+    <a href="http://www.mp3tag.de/en/">Mp3tag</a> export &nbsp;/&nbsp; interactive viewer powered by <a href="https://www.anthropic.com/">Anthrop\c with Claude ©</a> &nbsp;/&nbsp; [@r:sf!] 
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────
+let ALL_DATA    = [];
+let filteredRows = [];
+let sortCol = -1, sortDir = 0;
+let searchTerm  = '';
+let colFilter   = -1;
+
+const PAGE    = 200;
+let   rendered = 0;
+
+// ── Elements ───────────────────────────────────────────────
+const tbody        = document.getElementById('tbody');
+const searchInput  = document.getElementById('searchInput');
+const colFilterSel = document.getElementById('colFilter');
+const resultCount  = document.getElementById('resultCount');
+const ths          = document.querySelectorAll('thead th[data-col]');
+const splash       = document.getElementById('splash');
+const tableArea    = document.getElementById('tableArea');
+const importPanel  = document.getElementById('importPanel');
+const toggleImport = document.getElementById('toggleImport');
+const dropZone     = document.getElementById('dropZone');
+const fileInput    = document.getElementById('fileInput');
+const importStatus = document.getElementById('importStatus');
+
+// ── Import panel toggle ────────────────────────────────────
+toggleImport.addEventListener('click', () => {
+  importPanel.classList.toggle('open');
+});
+
+dropZone.addEventListener('click', () => fileInput.click());
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
+});
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files[0]) processFile(fileInput.files[0]);
+  fileInput.value = '';
+});
+
+// ── File processing ────────────────────────────────────────
+function processFile(file) {
+  const name = file.name.toLowerCase();
+  setStatus('⏳ Reading…', '');
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const text = e.target.result;
+      let rows;
+      if (name.endsWith('.html') || name.endsWith('.htm')) {
+        rows = parseHTML(text);
+      } else {
+        // CSV / TSV / TXT
+        const sep = text.includes('\t') ? '\t' : ';';
+        rows = parseDelimited(text, sep);
+      }
+      if (!rows || rows.length === 0) throw new Error('No data rows found.');
+      loadData(rows, file.name);
+      setStatus(`✔ Loaded ${rows.length.toLocaleString()} tracks from "${file.name}"`, 'ok');
+    } catch(err) {
+      setStatus('✘ ' + err.message, 'err');
+    }
+  };
+  reader.onerror = () => setStatus('✘ Could not read file.', 'err');
+  // Detect encoding: Mp3tag exports CSV as UTF-16; read as ArrayBuffer first to check BOM
+  const bufReader = new FileReader();
+  bufReader.onload = e2 => {
+    const buf   = e2.target.result;
+    const bytes = new Uint8Array(buf.slice(0, 4));
+    // UTF-16 LE BOM: FF FE  |  UTF-16 BE BOM: FE FF
+    const isUTF16 = (bytes[0] === 0xFF && bytes[1] === 0xFE) ||
+                    (bytes[0] === 0xFE && bytes[1] === 0xFF);
+    reader.readAsText(file, isUTF16 ? 'UTF-16' : 'UTF-8');
+  };
+  bufReader.readAsArrayBuffer(file.slice(0, 4));
+}
+
+function setStatus(msg, cls) {
+  importStatus.textContent = msg;
+  importStatus.className = cls;
+}
+
+// ── Parse Mp3tag HTML export ───────────────────────────────
+function parseHTML(html) {
+  // ── 1. Extract stats from RAW text before any DOM parsing ──
+  extractHTMLStats(html);
+
+  // ── 2. Parse DOM ──
+  const parser = new DOMParser();
+  const doc    = parser.parseFromString(html, 'text/html');
+
+  // Find the track table by looking for the one whose first row has <th> elements
+  // (the stats section uses bare <td> outside any real table and gets auto-wrapped
+  //  by the browser, so we must identify the real table by its header row).
+  const tables = doc.querySelectorAll('table');
+  let trackTable = null;
+  tables.forEach(t => {
+    if (!trackTable && t.querySelector('th')) trackTable = t;
+  });
+  // Fallback: biggest table
+  if (!trackTable) {
+    let best = 0;
+    tables.forEach(t => { const n = t.querySelectorAll('tr').length; if (n > best) { best = n; trackTable = t; } });
+  }
+  if (!trackTable) throw new Error('No track table found in HTML.');
+
+  // ── 3. Map header columns ──
+  const COL_MAP = {
+    '#':0,'no':0,'nr':0,'num':0,'number':0,
+    'artist':1,'interpret':1,
+    'title':2,'song':2,'track':2,'titel':2,
+    'album':3,
+    'length':4,'lenght':4,'duration':4,'länge':4,'dauer':4,
+    'year':5,'jahr':5,
+    'country':6,'land':6,
+    'genre':7
+  };
+
+  const headerCells = Array.from(trackTable.querySelectorAll('tr:first-child th, tr:first-child td'))
+    .map(c => c.textContent.trim().toLowerCase());
+
+  // Short keys (<=3 chars) require exact match; longer keys allow substring match
+  const colOrder = headerCells.map(h => {
+    for (const [k,v] of Object.entries(COL_MAP)) {
+      if (k.length <= 3 ? h === k : h.includes(k)) return v;
+    }
+    return -1;
+  });
+  const hasHeader = colOrder.some(c => c >= 0);
+
+  // ── 4. Read data rows ──
+  const rows = [];
+  const trs  = trackTable.querySelectorAll('tr');
+  trs.forEach((tr, ri) => {
+    if (ri === 0 && hasHeader) return; // skip header row
+    const cells = Array.from(tr.querySelectorAll('td')).map(c => c.textContent.trim());
+    if (cells.length < 2) return;
+    let row;
+    if (hasHeader) {
+      row = Array(8).fill('');
+      colOrder.forEach((ci, ti) => { if (ci >= 0 && ti < cells.length) row[ci] = cells[ti]; });
+    } else {
+      row = cells.slice(0, 8);
+      while (row.length < 8) row.push('');
+    }
+    if (row.some(c => c !== '')) rows.push(row);
+  });
+
+  return rows;
+}
+
+// Stats are extracted from the RAW html string to avoid DOM-mangling issues
+function extractHTMLStats(html) {
+  const tryMatch = (re) => { const m = html.match(re); return m ? m[1].trim() : null; };
+  // Mp3tag export stores stats as: <td ...>| Label:</td><td ...>VALUE |</td>
+  // We match the raw text between the pipe chars that follow each label
+  const tracks   = tryMatch(/Total Tracks[^<]*<\/td>\s*<td[^>]*>([^|<]+)/i);
+  const size     = tryMatch(/Total Size[^<]*<\/td>\s*<td[^>]*>([^|<]+)/i);
+  const duration = tryMatch(/Total Length[^<]*<\/td>\s*<td[^>]*>([^|<]+)/i);
+  const quality  = tryMatch(/Settings[^<]*<\/td>\s*<td[^>]*>([^|<]+)/i);
+  const date     = tryMatch(/Date[^<]*<\/td>\s*<td[^>]*>([^|<]+)/i);
+  if (tracks)   document.getElementById('sTracks').textContent   = tracks.replace(/\|/g,'').trim();
+  if (size)     document.getElementById('sSize').textContent     = size.replace(/\|/g,'').trim();
+  if (duration) document.getElementById('sDuration').textContent = duration.replace(/\|/g,'').trim();
+  if (quality)  document.getElementById('sQuality').textContent  = quality.replace(/\|/g,'').trim();
+  if (date)     document.getElementById('sDate').textContent     = date.replace(/\|/g,'').trim();
+}
+
+// ── Parse CSV / TSV ────────────────────────────────────────
+function parseDelimited(text, sep) {
+  const lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+  const rows  = [];
+  let firstDataLine = 0;
+
+  // Scan first few lines for STATS row and column header row
+  // STATS;total_tracks;total_size;total_duration;quality;date
+  for (let i = 0; i < Math.min(3, lines.length); i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    const lower = line.toLowerCase();
+    if (lower.startsWith('stats')) {
+      const cells = splitCSVLine(line, sep);
+      if (cells[1]) document.getElementById('sTracks').textContent   = cells[1].trim();
+      if (cells[2]) document.getElementById('sSize').textContent     = cells[2].trim();
+      if (cells[3]) document.getElementById('sDuration').textContent = cells[3].trim();
+      if (cells[4]) document.getElementById('sQuality').textContent  = cells[4].trim();
+      if (cells[5]) document.getElementById('sDate').textContent     = cells[5].trim();
+      firstDataLine = Math.max(firstDataLine, i + 1);
+    } else if (lower.includes('artist') || lower.includes('#') || lower.startsWith('no')) {
+      firstDataLine = Math.max(firstDataLine, i + 1);
+    }
+  }
+
+  for (let i = firstDataLine; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    const cells = splitCSVLine(line, sep);
+    while (cells.length < 8) cells.push('');
+    rows.push(cells.slice(0, 8));
+  }
+
+  // Fallback track count if no STATS row
+  if (document.getElementById('sTracks').textContent === '\u2014')
+    document.getElementById('sTracks').textContent = rows.length.toLocaleString();
+
+  return rows;
+}
+
+function splitCSVLine(line, sep) {
+  const result = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') {
+      if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+      else inQ = !inQ;
+    } else if (c === sep && !inQ) {
+      result.push(cur);
+      cur = '';
+    } else {
+      cur += c;
+    }
+  }
+  result.push(cur);
+  return result;
+}
+
+// ── Load data into viewer ──────────────────────────────────
+function loadData(rows, filename) {
+  ALL_DATA = rows;
+  splash.style.display   = 'none';
+  tableArea.style.display = '';
+  importPanel.classList.remove('open');
+  sortCol = -1; sortDir = 0;
+  ths.forEach(t => t.classList.remove('sort-asc','sort-desc'));
+  applyFilters();
+}
+
+// ── Rendering ──────────────────────────────────────────────
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function highlight(s, q) {
+  if (!q) return escapeHtml(s);
+  const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'gi');
+  return escapeHtml(s).replace(re, m => '<mark>' + m + '</mark>');
+}
+
+function renderRows(from, to) {
+  const frag = document.createDocumentFragment();
+  const q    = searchTerm;
+  for (let i = from; i < to && i < filteredRows.length; i++) {
+    const r  = filteredRows[i];
+    const tr = document.createElement('tr');
+    tr.innerHTML = [
+      `<td>${escapeHtml(r[0])}</td>`,
+      `<td>${highlight(r[1]||'', q)}</td>`,
+      `<td title="${escapeHtml(r[2]||'')}">${highlight(r[2]||'', q)}</td>`,
+      `<td title="${escapeHtml(r[3]||'')}">${highlight(r[3]||'', q)}</td>`,
+      `<td>${escapeHtml(r[4]||'')}</td>`,
+      `<td>${highlight(r[5]||'', q)}</td>`,
+      `<td>${highlight(r[6]||'', q)}</td>`,
+      `<td>${highlight(r[7]||'', q)}</td>`
+    ].join('');
+    frag.appendChild(tr);
+  }
+  tbody.appendChild(frag);
+  rendered = to;
+}
+
+function renderAll() {
+  tbody.innerHTML = '';
+  rendered = 0;
+  if (filteredRows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" class="no-results">No results for <span>"${escapeHtml(searchTerm)}"</span></td></tr>`;
+    updateCount(); return;
+  }
+  renderRows(0, Math.min(PAGE, filteredRows.length));
+  updateCount();
+}
+
+function updateCount() {
+  const total = ALL_DATA.length, shown = filteredRows.length;
+  resultCount.innerHTML = shown === total
+    ? `<b>${total.toLocaleString()}</b> tracks`
+    : `<b>${shown.toLocaleString()}</b> of ${total.toLocaleString()} tracks`;
+}
+
+// Infinite scroll sentinel
+const sentinel = document.createElement('div');
+document.getElementById('tableArea').appendChild(sentinel);
+new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting && rendered < filteredRows.length)
+    renderRows(rendered, Math.min(rendered + PAGE, filteredRows.length));
+}, { rootMargin: '200px' }).observe(sentinel);
+
+// ── Filter & Sort ──────────────────────────────────────────
+function applyFilters() {
+  const q    = searchTerm.toLowerCase().trim();
+  const qCol = colFilter;
+  filteredRows = q
+    ? ALL_DATA.filter(r => qCol >= 0
+        ? (r[qCol]||'').toLowerCase().includes(q)
+        : r.some(c => (c||'').toLowerCase().includes(q)))
+    : ALL_DATA.slice();
+  if (sortCol >= 0 && sortDir !== 0) sortRows();
+  renderAll();
+}
+
+function sortRows() {
+  const col = sortCol, dir = sortDir;
+  filteredRows.sort((a, b) => {
+    const av = (a[col]||'').toLowerCase();
+    const bv = (b[col]||'').toLowerCase();
+    // Always push empty values to the bottom, regardless of sort direction
+    if (!av && bv) return 1;
+    if (av && !bv) return -1;
+    // Numeric sort for #, Year; time sort for Length
+    if (col === 0 || col === 5) return dir * ((parseFloat(av)||0) - (parseFloat(bv)||0));
+    if (col === 4) return dir * (timeToSec(av) - timeToSec(bv));
+    return dir * av.localeCompare(bv);
+  });
+}
+
+function timeToSec(t) {
+  const p = t.split(':').map(Number);
+  return p.length === 2 ? p[0]*60+p[1] : p.length === 3 ? p[0]*3600+p[1]*60+p[2] : 0;
+}
+
+// ── Events ─────────────────────────────────────────────────
+let debounce;
+searchInput.addEventListener('input', () => {
+  clearTimeout(debounce);
+  debounce = setTimeout(() => { searchTerm = searchInput.value; applyFilters(); }, 200);
+});
+
+colFilterSel.addEventListener('change', () => {
+  colFilter = parseInt(colFilterSel.value);
+  applyFilters();
+});
+
+ths.forEach(th => {
+  const col = parseInt(th.dataset.col);
+  th.addEventListener('click', () => {
+    if (sortCol === col) {
+      sortDir = sortDir === 1 ? -1 : sortDir === -1 ? 0 : 1;
+    } else {
+      sortCol = col; sortDir = 1;
+    }
+    ths.forEach(t => t.classList.remove('sort-asc','sort-desc'));
+    if (sortDir === 1)  th.classList.add('sort-asc');
+    if (sortDir === -1) th.classList.add('sort-desc');
+    if (sortDir === 0)  { sortCol = -1; filteredRows = ALL_DATA.slice(); renderAll(); return; }
+    sortRows();
+    renderAll();
+  });
+});
+// ── Auto-load playlist.csv on page open ────────────────────
+function showManual(msg) {
+  document.getElementById('splashIcon').textContent  = '📂';
+  document.getElementById('splashTitle').textContent = 'NO PLAYLIST LOADED';
+  document.getElementById('splashMsg').innerHTML     = msg || 'Click below to import your Mp3tag export.<br/>Supports HTML and CSV.';
+}
+
+async function autoLoad() {
+  if (location.protocol === 'file:') { showManual(); return; }
+
+  document.getElementById('splashIcon').textContent  = '🌀';
+  document.getElementById('splashTitle').textContent = 'LOADING PLAYLIST…';
+  document.getElementById('splashMsg').innerHTML     = 'Fetching <code>playlist.csv</code>…';
+
+  try {
+    let res = await fetch('playlist.csv');
+    if (res.ok) {
+      const buf    = await res.arrayBuffer();
+      const bytes  = new Uint8Array(buf.slice(0, 4));
+      const isU16  = (bytes[0]===0xFF&&bytes[1]===0xFE)||(bytes[0]===0xFE&&bytes[1]===0xFF);
+      const text   = new TextDecoder(isU16 ? 'utf-16' : 'utf-8').decode(buf);
+      const sep    = text.includes('\t') ? '\t' : ';';
+      const rows   = parseDelimited(text, sep);
+      if (!rows.length) throw new Error('CSV had no track data.');
+      loadData(rows, 'playlist.csv');
+      return;
+    }
+    res = await fetch('playlist.html');
+    if (res.ok) {
+      const text = await res.text();
+      const rows = parseHTML(text);
+      if (!rows.length) throw new Error('HTML had no track data.');
+      loadData(rows, 'playlist.html');
+      return;
+    }
+    throw new Error('Neither <code>playlist.csv</code> nor <code>playlist.html</code> found on server.');
+  } catch(err) {
+    showManual('Could not auto-load: ' + err.message + '<br/>Use the button below to load manually.');
+  }
+}
+
+autoLoad();
+
+</script>
+</body>
+</html>

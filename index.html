@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
@@ -340,7 +341,7 @@
 
 <!-- HEADER -->
 <div class="header">
-  <div class="header-title">🧿 RSF<span>_</span>MP3'<span style="font-size:0.6em;vertical-align:0.00em;color:var(--accent)">s</span><span>🎧</span></sub></div>
+  <div class="header-title">RSF<span>_</span>MP3s</div>
   <div class="stats" id="headerStats">
     <div class="stat-item"><span class="stat-label">Tracks</span><span class="stat-val" id="sTracks">—</span></div>
     <div class="stat-item"><span class="stat-label">Size</span><span class="stat-val" id="sSize">—</span></div>
@@ -383,7 +384,7 @@
   <div class="import-zone" id="dropZone">
     <big>📂</big>
     <b>Click to browse</b> or drag &amp; drop<br/>
-    <small>Only supports: Mp3tag HTML · CSV · TSV personal exports </small>
+    <small>Supports: Mp3tag HTML export · CSV · TSV</small>
     <input type="file" id="fileInput" accept=".html,.htm,.csv,.tsv,.txt" style="display:none"/>
   </div>
 
@@ -391,15 +392,14 @@
     <h3>HOW TO EXPORT FROM MP3TAG</h3>
     <ol>
       <li>In Mp3tag: <b>File → Export…</b></li>
-      <li>Choose <b>html</b> (the personal template)</li>
-      <li><i>— or —</i> choose <b>csv · tsv</b> for a lighter file</li>
-      <li>Load it on the left side drop zone</li>
+      <li>Choose <b>html</b> (the same template you already use)</li>
+      <li><i>— or —</i> choose <b>csv</b> for a lighter file</li>
+      <li>Load it here with the button above</li>
     </ol>
     <br/>
-    <h3>CSV · TSV FORMATS (if you create a custom export)</h3>
+    <h3>CSV FORMAT (if you create a custom export)</h3>
     Columns in order, semicolon-separated:<br/>
-    <code>STATS: Tracks;Size;Duration;Quality;Updater</code><br/>
-	<code>TABLE: #;Artist;Title;Album;Length;Year;Country;Genre</code><br/>
+    <code>#;Artist;Title;Album;Length;Year;Country;Genre</code><br/>
     <small>First line can be a header row — it will be skipped automatically.</small>
   </div>
 
@@ -408,10 +408,10 @@
 
 <!-- SPLASH -->
 <div id="splash">
-  <div class="splash-icon" id="splashIcon">🥶</div>
-  <h2 id="splashTitle">NO PLAYLIST LOADED</h2>
-  <p id="splashMsg">Click <b>Load Playlist</b> above to import your Mp3tag export.<br/>Only supports the personal HTML and CSV · TSV exports, created on the software.</p>
-  <button class="splash-btn" id="splashBtn" onclick="document.getElementById('toggleImport').click()">Load Playlist</button>
+  <div class="splash-icon">🎵</div>
+  <h2>NO PLAYLIST LOADED</h2>
+  <p>Click <b>Load Playlist</b> above to import your Mp3tag export.<br/>Supports the HTML export you already have, plus CSV and TSV.</p>
+  <button class="splash-btn" onclick="document.getElementById('toggleImport').click()">Load Playlist</button>
 </div>
 
 <!-- TABLE (hidden until data loaded) -->
@@ -434,7 +434,7 @@
     </table>
   </div>
   <div class="footer">
-    <a href="http://www.mp3tag.de/en/">Mp3tag</a> export &nbsp;/&nbsp; interactive viewer powered by <a href="https://www.anthropic.com/">Anthrop\c with Claude ©</a> &nbsp;/&nbsp; [@r:sf!] 
+    <a href="http://www.mp3tag.de/en/">Mp3tag</a> export &nbsp;/&nbsp; interactive viewer &nbsp;/&nbsp; [@r:sf!]
   </div>
 </div>
 
@@ -507,17 +507,7 @@ function processFile(file) {
     }
   };
   reader.onerror = () => setStatus('✘ Could not read file.', 'err');
-  // Detect encoding: Mp3tag exports CSV as UTF-16; read as ArrayBuffer first to check BOM
-  const bufReader = new FileReader();
-  bufReader.onload = e2 => {
-    const buf   = e2.target.result;
-    const bytes = new Uint8Array(buf.slice(0, 4));
-    // UTF-16 LE BOM: FF FE  |  UTF-16 BE BOM: FE FF
-    const isUTF16 = (bytes[0] === 0xFF && bytes[1] === 0xFE) ||
-                    (bytes[0] === 0xFE && bytes[1] === 0xFF);
-    reader.readAsText(file, isUTF16 ? 'UTF-16' : 'UTF-8');
-  };
-  bufReader.readAsArrayBuffer(file.slice(0, 4));
+  reader.readAsText(file, 'UTF-8');
 }
 
 function setStatus(msg, cls) {
@@ -812,7 +802,7 @@ function showManual(msg) {
 async function autoLoad() {
   if (location.protocol === 'file:') { showManual(); return; }
 
-  document.getElementById('splashIcon').textContent  = '🌀';
+  document.getElementById('splashIcon').textContent  = '⏳';
   document.getElementById('splashTitle').textContent = 'LOADING PLAYLIST…';
   document.getElementById('splashMsg').innerHTML     = 'Fetching <code>playlist.csv</code>…';
 
@@ -843,6 +833,7 @@ async function autoLoad() {
   }
 }
 
+// Wait for DOM to be fully ready before running
 document.addEventListener('DOMContentLoaded', autoLoad);
 
 </script>

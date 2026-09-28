@@ -3,7 +3,7 @@
   <meta charset="utf-8"/>
   <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="pragma" content="no-cache"/>
-  <!-- Viewer_MP3_RSF_v5.3 -->
+  <!-- Viewer_MP3_RSF_v5.21 -->
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>RSF_MP3s Playlist</title>
   <style>
@@ -240,7 +240,7 @@
     #importStatus.err { color: #ff4d4d; }
 
     /* ── TABLE ── */
-    .table-wrap { overflow-x: auto; }
+    .table-wrap { overflow-x: clip; }
 
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
 
@@ -260,6 +260,7 @@
       white-space: nowrap;
       transition: background .15s;
     }
+    thead th { position: sticky; top: 109px; z-index: 98; }
     thead th:hover { background: #344d63; }
     thead th.sort-asc  { color: #00d4ff; }
     thead th.sort-desc { color: #ff6b35; }

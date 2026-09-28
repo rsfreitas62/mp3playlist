@@ -240,7 +240,7 @@
     #importStatus.err { color: #ff4d4d; }
 
     /* ── TABLE ── */
-    .table-wrap { overflow-x: clip; }
+    .table-wrap { overflow-x: auto; }
 
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
 
@@ -260,7 +260,10 @@
       white-space: nowrap;
       transition: background .15s;
     }
-    thead th { position: sticky; top: 109px; z-index: 98; }
+    @media (min-width: 1100px) {
+      .table-wrap { overflow-x: clip; }
+      thead th { position: sticky; top: 109px; z-index: 98; }
+    }
     thead th:hover { background: #344d63; }
     thead th.sort-asc  { color: #00d4ff; }
     thead th.sort-desc { color: #ff6b35; }

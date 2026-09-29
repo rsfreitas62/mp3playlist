@@ -3,7 +3,7 @@
   <meta charset="utf-8"/>
   <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="pragma" content="no-cache"/>
-  <!-- Viewer_MP3_RSF_v5.21 -->
+  <!-- Viewer_MP3_RSF_v5.32 -->
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>RSF_MP3s Playlist</title>
   <style>
@@ -353,9 +353,9 @@
     <div class="stat-item"><span class="stat-label">Tracks</span><span class="stat-val" id="sTracks">—</span></div>
     <div class="stat-item"><span class="stat-label">Size</span><span class="stat-val" id="sSize">—</span></div>
     <div class="stat-item"><span class="stat-label">Duration</span><span class="stat-val" id="sDuration">—</span></div>
-    <div class="stat-item"><span class="stat-label">Quality</span><span class="stat-val" id="sQuality">—</span></div>
-    <div class="stat-item"><span class="stat-label">Codec</span><span class="stat-val">MPEG-1 Layer III</span></div>
-    <div class="stat-item"><span class="stat-label">Tags</span><span class="stat-val">ID3v1 · ID3v2.3</span></div>
+    <div class="stat-item"><span class="stat-label">Quality</span><span class="stat-val">192 kbps CBR · 44.1 kHz · JS</span></div>
+    <div class="stat-item"><span class="stat-label">Codec</span><span class="stat-val">MPEG · Layer III</span></div>
+    <div class="stat-item"><span class="stat-label">Tags</span><span class="stat-val">ID3v2.3</span></div>
     <div class="stat-item"><span class="stat-label">Updated</span><span class="stat-val" id="sDate">—</span></div>
   </div>
 </div>
@@ -406,7 +406,7 @@
     <br/>
     <h3>CSV · TSV FORMATS (if you create a custom export)</h3>
     Columns in order, semicolon-separated:<br/>
-    <code>STATS: Tracks;Size;Duration;Quality;Updater</code><br/>
+    <code>STATS: Tracks;Size;Duration;Updated</code><br/>
 	<code>TABLE: #;Artist;Title;Album;Length;Year;Country;Genre</code><br/>
     <small>First line can be a header row — it will be skipped automatically.</small>
   </div>
@@ -601,6 +601,14 @@ function parseHTML(html) {
   return rows;
 }
 
+// "35 days, 06:27:40" -> "35d 06h 27m 40s" (unrecognised text is left untouched)
+function formatDuration(txt) {
+  const m = txt.match(/^(?:(\d+)\s*days?,?\s*)?(\d+):(\d{2}):(\d{2})$/i);
+  if (!m) return txt;
+  const pad = n => String(n).padStart(2, '0');
+  return (m[1] ? m[1] + 'd ' : '') + pad(m[2]) + 'h ' + m[3] + 'm ' + m[4] + 's';
+}
+
 // Stats are extracted from the RAW html string to avoid DOM-mangling issues
 function extractHTMLStats(html) {
   const tryMatch = (re) => { const m = html.match(re); return m ? m[1].trim() : null; };
@@ -609,12 +617,10 @@ function extractHTMLStats(html) {
   const tracks   = tryMatch(/Total Tracks[^<]*<\/td>\s*<td[^>]*>([^|<]+)/i);
   const size     = tryMatch(/Total Size[^<]*<\/td>\s*<td[^>]*>([^|<]+)/i);
   const duration = tryMatch(/Total Length[^<]*<\/td>\s*<td[^>]*>([^|<]+)/i);
-  const quality  = tryMatch(/Settings[^<]*<\/td>\s*<td[^>]*>([^|<]+)/i);
   const date     = tryMatch(/Date[^<]*<\/td>\s*<td[^>]*>([^|<]+)/i);
   if (tracks)   document.getElementById('sTracks').textContent   = tracks.replace(/\|/g,'').trim();
   if (size)     document.getElementById('sSize').textContent     = size.replace(/\|/g,'').trim();
-  if (duration) document.getElementById('sDuration').textContent = duration.replace(/\|/g,'').trim();
-  if (quality)  document.getElementById('sQuality').textContent  = quality.replace(/\|/g,'').trim();
+  if (duration) document.getElementById('sDuration').textContent = formatDuration(duration.replace(/\|/g,'').trim());
   if (date)     document.getElementById('sDate').textContent     = date.replace(/\|/g,'').trim();
 }
 
@@ -625,7 +631,7 @@ function parseDelimited(text, sep) {
   let firstDataLine = 0;
 
   // Scan first few lines for STATS row and column header row
-  // STATS;total_tracks;total_size;total_duration;quality;date
+  // STATS;total_tracks;total_size;total_duration;date
   for (let i = 0; i < Math.min(3, lines.length); i++) {
     const line = lines[i].trim();
     if (!line) continue;
@@ -634,9 +640,9 @@ function parseDelimited(text, sep) {
       const cells = splitCSVLine(line, sep);
       if (cells[1]) document.getElementById('sTracks').textContent   = cells[1].trim();
       if (cells[2]) document.getElementById('sSize').textContent     = cells[2].trim();
-      if (cells[3]) document.getElementById('sDuration').textContent = cells[3].trim();
-      if (cells[4]) document.getElementById('sQuality').textContent  = cells[4].trim();
-      if (cells[5]) document.getElementById('sDate').textContent     = cells[5].trim();
+      if (cells[3]) document.getElementById('sDuration').textContent = formatDuration(cells[3].trim());
+      const dateCell = cells[5] || cells[4]; // old files had Quality in cells[4]
+      if (dateCell) document.getElementById('sDate').textContent     = dateCell.trim();
       firstDataLine = Math.max(firstDataLine, i + 1);
     } else if (lower.includes('artist') || lower.includes('#') || lower.startsWith('no')) {
       firstDataLine = Math.max(firstDataLine, i + 1);

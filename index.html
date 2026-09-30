@@ -819,7 +819,7 @@ ths.forEach(th => {
     renderAll();
   });
 });
-// ── Auto-load playlist.csv on page open ────────────────────
+// ── Auto-load playlist.tsv / .csv / .html on page open ────────────────────
 function showManual(msg) {
   document.getElementById('splashIcon').textContent  = '📂';
   document.getElementById('splashTitle').textContent = 'NO PLAYLIST LOADED';
@@ -831,20 +831,23 @@ async function autoLoad() {
 
   document.getElementById('splashIcon').textContent  = '🌀';
   document.getElementById('splashTitle').textContent = 'LOADING PLAYLIST…';
-  document.getElementById('splashMsg').innerHTML     = 'Fetching <code>playlist.csv</code>…';
+  document.getElementById('splashMsg').innerHTML     = 'Fetching playlist…';
 
   try {
-    let res = await fetch('playlist.csv');
-    if (res.ok) {
-      const buf    = await res.arrayBuffer();
-      const bytes  = new Uint8Array(buf.slice(0, 4));
-      const isU16  = (bytes[0]===0xFF&&bytes[1]===0xFE)||(bytes[0]===0xFE&&bytes[1]===0xFF);
-      const text   = new TextDecoder(isU16 ? 'utf-16' : 'utf-8').decode(buf);
-      const sep    = text.includes('\t') ? '\t' : ';';
-      const rows   = parseDelimited(text, sep);
-      if (!rows.length) throw new Error('CSV had no track data.');
-      loadData(rows, 'playlist.csv');
-      return;
+    let res;
+    for (const fname of ['playlist.tsv', 'playlist.csv']) {
+      res = await fetch(fname);
+      if (res.ok) {
+        const buf    = await res.arrayBuffer();
+        const bytes  = new Uint8Array(buf.slice(0, 4));
+        const isU16  = (bytes[0]===0xFF&&bytes[1]===0xFE)||(bytes[0]===0xFE&&bytes[1]===0xFF);
+        const text   = new TextDecoder(isU16 ? 'utf-16' : 'utf-8').decode(buf);
+        const sep    = text.includes('\t') ? '\t' : ';';
+        const rows   = parseDelimited(text, sep);
+        if (!rows.length) throw new Error(fname + ' had no track data.');
+        loadData(rows, fname);
+        return;
+      }
     }
     res = await fetch('playlist.html');
     if (res.ok) {
@@ -854,7 +857,7 @@ async function autoLoad() {
       loadData(rows, 'playlist.html');
       return;
     }
-    throw new Error('Neither <code>playlist.csv</code> nor <code>playlist.html</code> found on server.');
+    throw new Error('None of <code>playlist.tsv</code>, <code>playlist.csv</code> or <code>playlist.html</code> found on server.');
   } catch(err) {
     showManual('Could not auto-load: ' + err.message + '<br/>Use the button below to load manually.');
   }

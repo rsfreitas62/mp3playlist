@@ -3,7 +3,7 @@
   <meta charset="utf-8"/>
   <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="pragma" content="no-cache"/>
-  <!-- Viewer_MP3_RSF_v5.32 -->
+  <!-- Viewer_MP3_RSF_v5.4 -->
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>RSF_MP3s Playlist</title>
   <style>
@@ -354,7 +354,7 @@
     <div class="stat-item"><span class="stat-label">Size</span><span class="stat-val" id="sSize">—</span></div>
     <div class="stat-item"><span class="stat-label">Duration</span><span class="stat-val" id="sDuration">—</span></div>
     <div class="stat-item"><span class="stat-label">Quality</span><span class="stat-val">192 kbps CBR · 44.1 kHz · JS</span></div>
-    <div class="stat-item"><span class="stat-label">Codec</span><span class="stat-val">MPEG · Layer III</span></div>
+    <div class="stat-item"><span class="stat-label">Codec</span><span class="stat-val">MPEG-1 · Layer III</span></div>
     <div class="stat-item"><span class="stat-label">Tags</span><span class="stat-val">ID3v2.3</span></div>
     <div class="stat-item"><span class="stat-label">Updated</span><span class="stat-val" id="sDate">—</span></div>
   </div>
@@ -391,21 +391,21 @@
   <div class="import-zone" id="dropZone">
     <big>📂</big>
     <b>Click to browse</b> or drag &amp; drop<br/>
-    <small>Only supports: Mp3tag HTML · CSV · TSV personal exports </small>
+    <small>Only supports: Mp3tag HTML &middot CSV &middot TSV customized exports </small>
     <input type="file" id="fileInput" accept=".html,.htm,.csv,.tsv,.txt" style="display:none"/>
   </div>
 
   <div class="import-instructions">
     <h3>HOW TO EXPORT FROM MP3TAG</h3>
     <ol>
-      <li>In Mp3tag: <b>File → Export…</b></li>
-      <li>Choose <b>html</b> (the personal template)</li>
-      <li><i>— or —</i> choose <b>csv · tsv</b> for a lighter file</li>
+      <li>In Mp3tag: <b>Select all files → Actions → Generate:</b></li>
+      <li>Choose <b>TSV</b> (recommended custom template)</li>
+      <li><i>— or —</i> choose <b>CSV · HTML</b> (this is the bigger file)</li>
       <li>Load it on the left side drop zone</li>
     </ol>
     <br/>
-    <h3>CSV · TSV FORMATS (if you create a custom export)</h3>
-    Columns in order, semicolon-separated:<br/>
+    <h3>CSV · TSV FORMATS (you have to create a custom export)</h3>
+    Columns in order, semicolon-separated (see Mp3Tag sintax):<br/>
     <code>STATS: Tracks;Size;Duration;Updated</code><br/>
 	<code>TABLE: #;Artist;Title;Album;Length;Year;Country;Genre</code><br/>
     <small>First line can be a header row — it will be skipped automatically.</small>
@@ -442,7 +442,7 @@
     </table>
   </div>
   <div class="footer">
-    <p>interactive playlist viewer - [@r:sf!] 2026</p>
+    <p>interactive playlist viewer &middot; &copy; 2026 [@<span style="color: var(--accent);">r</span>:<span style="color: var(--accent);">s</span><span style="color: var(--accent);">f</span>!]</p>
 </div>
 
 <script>
@@ -823,7 +823,7 @@ ths.forEach(th => {
 function showManual(msg) {
   document.getElementById('splashIcon').textContent  = '📂';
   document.getElementById('splashTitle').textContent = 'NO PLAYLIST LOADED';
-  document.getElementById('splashMsg').innerHTML     = msg || 'Click below to import your Mp3tag export.<br/>Supports HTML and CSV.';
+  document.getElementById('splashMsg').innerHTML     = msg || 'Click below to import your Mp3tag export.<br/>Supports TSV (CSV and HTML).';
 }
 
 async function autoLoad() {

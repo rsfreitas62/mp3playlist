@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <!-- TopArtists_MP3_RSF_v1.1 -->
+  <title>RSF Top Artists</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700&display=swap');
+
+    :root {
+      --bg:#1a2530; --bg2:#212f3d; --surface:#263545; --border:#334d66;
+      --accent:#00d4ff; --accent2:#ff6b35; --text:#d4e8f7; --text-dim:#7a9bb8;
+      /* 8 levels (the original Racks page also had c0..c7): dim -> bright */
+      --c0:#7a9bb8; --c1:#6aa7c9; --c2:#58b4dc; --c3:#3fc2ec;
+      --c4:#12cdf7; --c5:#00d4ff; --c6:#66e6ff; --c7:#c2f6ff;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Barlow Condensed','Arial Narrow',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+    .top { position:sticky; top:0; z-index:100; }
+    .header {
+      background:linear-gradient(135deg,#0d1a24 0%,#1a2e40 50%,#0d1a24 100%);
+      border-bottom:2px solid var(--accent); padding:12px 20px;
+      display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+      box-shadow:0 4px 20px rgba(0,212,255,.15);
+    }
+    .header-title { font-size:22px; font-weight:700; letter-spacing:3px; color:var(--accent); text-transform:uppercase; }
+    .header-title span { color:var(--accent2); }
+    .header-title small { font-size:.6em; color:var(--accent); }
+
+    .btn {
+      display:inline-flex; align-items:center; gap:6px; background:transparent;
+      border:1px solid var(--accent2); color:var(--accent2);
+      font-family:inherit; font-size:13px; font-weight:600; letter-spacing:1px;
+      padding:6px 14px; border-radius:4px; cursor:pointer; text-transform:uppercase;
+      text-decoration:none; white-space:nowrap; transition:background .15s,color .15s;
+    }
+    .btn:hover { background:var(--accent2); color:#fff; }
+    .back { margin-left:auto; }
+
+    .toolbar {
+      background:var(--surface); border-bottom:1px solid var(--border);
+      padding:9px 20px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    }
+    .seg { display:flex; align-items:center; gap:6px; font-size:14px; color:var(--text-dim); }
+    .seg button {
+      min-width:44px; min-height:32px; background:var(--bg2); color:var(--text);
+      border:1px solid var(--border); border-radius:4px; font-family:inherit; font-size:15px;
+      font-weight:600; cursor:pointer; transition:border-color .15s,background .15s;
+    }
+    .seg button:hover { border-color:var(--accent); }
+    .seg button.on { background:var(--accent); border-color:var(--accent); color:#0d1a24; cursor:default; }
+    .info { font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--text-dim); margin-left:auto; }
+    .info b { color:var(--accent); }
+    #loadBtn { display:none; }
+
+    /* ── IMPORT PANEL (same look as the playlist viewer) ── */
+    #importPanel { display:none; background:#0d1a24; border-bottom:2px solid var(--accent2); padding:16px 20px; }
+    #importPanel.open { display:block; }
+    .import-panel-title { font-size:13px; font-weight:700; letter-spacing:2px; color:var(--accent2); text-transform:uppercase; margin-bottom:10px; }
+    .import-zone {
+      border:2px dashed var(--border); border-radius:6px; padding:20px; text-align:center; cursor:pointer;
+      color:var(--text-dim); font-size:14px; line-height:1.8; transition:border-color .2s,background .2s;
+    }
+    .import-zone:hover, .import-zone.drag-over { border-color:var(--accent2); background:rgba(255,107,53,.06); color:var(--text); }
+    .import-zone big { display:block; font-size:28px; margin-bottom:4px; }
+    .import-zone b { color:var(--accent2); }
+    #importStatus { font-family:'Share Tech Mono',monospace; font-size:12px; min-height:18px; margin-top:8px; }
+    #importStatus.ok { color:#4dff91; } #importStatus.err { color:#ff4d4d; }
+
+    /* ── CLOUD ── */
+    #cloud {
+      max-width:1100px; margin:0 auto; padding:26px 18px 40px;
+      text-align:center; line-height:1.3; display:none;
+    }
+    #cloud .a {
+      display:inline; padding:1px 5px; cursor:default; white-space:nowrap;
+      transition:color .12s;
+    }
+    #cloud .l0{font-size:14px;color:var(--c0)} #cloud .l1{font-size:16px;color:var(--c1)}
+    #cloud .l2{font-size:18px;color:var(--c2)} #cloud .l3{font-size:21px;color:var(--c3)}
+    #cloud .l4{font-size:25px;color:var(--c4);font-weight:600} #cloud .l5{font-size:30px;color:var(--c5);font-weight:600}
+    #cloud .l6{font-size:37px;color:var(--c6);font-weight:700} #cloud .l7{font-size:45px;color:var(--c7);font-weight:700;text-shadow:0 0 14px rgba(0,212,255,.35)}
+    #cloud .a:hover { color:var(--accent2); }
+    @media (max-width:600px){
+      .header{padding:10px 14px} .toolbar{padding:8px 14px} #cloud{padding:18px 8px 30px}
+      .info{margin-left:0; width:100%}
+      #cloud .l0{font-size:13px} #cloud .l1{font-size:15px} #cloud .l2{font-size:17px} #cloud .l3{font-size:19px}
+      #cloud .l4{font-size:22px} #cloud .l5{font-size:26px} #cloud .l6{font-size:31px} #cloud .l7{font-size:37px}
+    }
+
+    /* ── SPLASH ── */
+    #splash { display:flex; flex-direction:column; align-items:center; padding:70px 20px; gap:14px; color:var(--text-dim); text-align:center; }
+    #splash .ic { font-size:48px; }
+    #splash h2 { font-size:20px; color:var(--text); letter-spacing:2px; }
+    #splash p { font-size:14px; max-width:440px; line-height:1.7; }
+    #splash.drag { background:rgba(255,107,53,.06); }
+    #splash .btn { background:var(--accent2); color:#fff; font-size:15px; padding:10px 24px; }
+    #splash .btn:hover { opacity:.85; }
+
+    .footer { text-align:center; padding:16px; font-size:11px; color:var(--text-dim); border-top:1px solid var(--border); font-family:'Share Tech Mono',monospace; }
+  </style>
+</head>
+<body>
+
+<div class="top">
+  <div class="header">
+    <div class="header-title">🧿 RSF<span>_</span><small>artists</small><span> 🎧</span></div>
+    <a class="btn back" href="index.html">← Playlist</a>
+  </div>
+  <div class="toolbar">
+    <div class="seg" id="seg">Top
+      <button data-n="50">50</button><button data-n="100" class="on">100</button><button data-n="200">200</button>
+    </div>
+    <button class="btn" id="loadBtn">Load Playlist</button>
+    <div class="info" id="info"></div>
+  </div>
+</div>
+
+<div id="importPanel">
+  <div class="import-panel-title">↓ Load your Mp3tag export</div>
+  <div class="import-zone" id="dropZone">
+    <big>📂</big>
+    <b>Click to browse</b> or drag &amp; drop<br/>
+    <small>Same playlist.tsv / CSV used by the playlist viewer</small>
+  </div>
+  <div id="importStatus"></div>
+  <button class="btn" id="clearBtn" style="margin-top:10px">Clear saved copy</button>
+</div>
+
+<div id="splash">
+  <div class="ic" id="spIcon">🌀</div>
+  <h2 id="spTitle">LOADING…</h2>
+  <p id="spMsg">Reading playlist…</p>
+  <button class="btn" id="spBtn" style="display:none">Load Playlist</button>
+</div>
+
+<div id="cloud"></div>
+<input type="file" id="fileInput" accept=".csv,.tsv,.txt" style="display:none"/>
+
+<div class="footer">interactive artist cloud &middot; &copy; 2026 [@<span style="color:var(--accent)">r</span>:<span style="color:var(--accent)">s</span><span style="color:var(--accent)">f</span>!]</div>
+
+<script>
+// ── Settings you can tweak ─────────────────────────────────
+const DEFAULT_N    = 100;   // 50 / 100 / 200
+const INCLUDE_TIES = true;  // artists tied at the cut-off count also appear (up to +20%)
+const SMART_CASE   = true;  // "THE MOODY BLUES" -> "The Moody Blues" (only when the whole name is uppercase)
+const ACRONYMS = new Set(['ATB','DFA','XTC','ELO','INXS','ABBA','KLF','AC/DC','MGMT','TLC','DJ','MC','KRS-ONE']);
+const NAME_FIX = {            // exact spelling for special cases (key = name in UPPERCASE)
+  'DZIHAN & KAMIEN':'dZihan & Kamien',
+  'MIDIVAL PUNDITZ':'MIDIval PunditZ'
+};
+const SMALL = new Set(['de','of','the','and','da','do','dos','das','du','la','le','von','van','der','y','e']);
+
+// <pure>
+const coll = new Intl.Collator('pt', { sensitivity:'base', numeric:true });
+
+function normKey(s){ return s.replace(/\s+/g,' ').trim().toLocaleUpperCase(); }
+
+function smartTitle(name){
+  const fix = NAME_FIX[normKey(name)];
+  if (fix) return fix;
+  if (!SMART_CASE) return name;
+  if (name !== name.toLocaleUpperCase() || name === name.toLocaleLowerCase()) return name; // already mixed case / no letters
+  return name.split(' ').map((tok,i) => {
+    if (ACRONYMS.has(tok) || /\d/.test(tok) || /^(\p{L}\.){2,}\p{L}?\.?$/u.test(tok)) return tok;
+    const low = tok.toLocaleLowerCase();
+    if (i > 0 && SMALL.has(low)) return low;
+    return low.replace(/(^|[-\/(&.])(\p{L})/gu, (m,p,c) => p + c.toLocaleUpperCase());
+  }).join(' ');
+}
+
+function splitCSVLine(line, sep) {
+  const result = []; let cur = '', inQ = false, fieldStart = true;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+      else if (inQ) { inQ = false; }
+      else if (fieldStart) { inQ = true; }
+      else { cur += ch; }
+      fieldStart = false;
+    } else if (ch === sep && !inQ) { result.push(cur); cur = ''; fieldStart = true; }
+    else { cur += ch; fieldStart = false; }
+  }
+  result.push(cur);
+  return result;
+}
+
+// Same file layout as the playlist viewer: STATS line, header row, then # ; Artist ; Title ; ...
+function parseArtists(text){
+  const sep = text.includes('\t') ? '\t' : ';';
+  const lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+  const counts = new Map(); let tracks = 0;
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    if (line.trim().toLowerCase().startsWith('stats')) continue;
+    const cells = splitCSVLine(line, sep);
+    const a = (cells[1] || '').trim();
+    if (!a) continue;
+    if (a.toLowerCase() === 'artist' && /^(#|no)/i.test((cells[0]||'').trim())) continue; // header row
+    counts.set(a, (counts.get(a) || 0) + 1); tracks++;
+  }
+  return { counts, tracks };
+}
+
+function aggregate(counts){            // Map(rawName -> n)  ->  [{name,n}] (case-insensitive merge)
+  const groups = new Map();
+  for (const [raw, n] of counts) {
+    const clean = raw.replace(/\s+/g,' ').trim(), key = normKey(clean);
+    if (!key) continue;
+    let g = groups.get(key);
+    if (!g) { g = { n:0, best:clean, bestN:0 }; groups.set(key, g); }
+    g.n += n;
+    if (n > g.bestN) { g.bestN = n; g.best = clean; }
+  }
+  return [...groups.values()].map(g => ({ name: smartTitle(g.best), n: g.n }));
+}
+
+function topN(list, N){
+  const sorted = list.slice().sort((a,b) => b.n - a.n || coll.compare(a.name, b.name));
+  if (sorted.length <= N) return { items: sorted, ties: false };
+  let end = N;
+  if (INCLUDE_TIES) {
+    const cutoff = sorted[N-1].n, limit = N + Math.ceil(N * 0.2);
+    while (end < sorted.length && end < limit && sorted[end].n === cutoff) end++;
+  }
+  return { items: sorted.slice(0, end), ties: end > N };
+}
+
+function levelsOf(items){              // 8 levels on a log scale of the track count
+  const ns = items.map(i => i.n);
+  const min = Math.min(...ns), max = Math.max(...ns);
+  if (max === min) return items.map(() => 3);
+  const a = Math.log(min), b = Math.log(max);
+  return items.map(i => Math.min(7, Math.floor((Math.log(i.n) - a) / (b - a) * 8)));
+}
+// </pure>
+
+// ── State & elements ───────────────────────────────────────
+let ARTISTS = [], TRACKS = 0, N = DEFAULT_N;
+const $ = id => document.getElementById(id);
+const cloud = $('cloud'), splash = $('splash'), info = $('info'), fileInput = $('fileInput');
+
+function decodeBuf(buf){
+  const b = new Uint8Array(buf.slice(0,4));
+  if (b[0]===0xFF && b[1]===0xFE) return new TextDecoder('utf-16le').decode(buf);
+  if (b[0]===0xFE && b[1]===0xFF) return new TextDecoder('utf-16be').decode(buf);
+  try { return new TextDecoder('utf-8', { fatal:true }).decode(buf); }
+  catch(e) { return new TextDecoder('windows-1252').decode(buf); }
+}
+
+// ── Render ─────────────────────────────────────────────────
+function render(){
+  const { items, ties } = topN(ARTISTS, N);
+  const lv = levelsOf(items);
+  const shown = items.slice().sort((a,b) => coll.compare(a.name, b.name));
+  const levelOf = new Map(items.map((it,i) => [it, lv[i]]));
+  cloud.textContent = '';
+  const frag = document.createDocumentFragment();
+  shown.forEach((it, i) => {
+    const s = document.createElement('span');
+    s.className = 'a l' + levelOf.get(it);
+    s.textContent = it.name;
+    s.title = it.name + ' · ' + it.n + (it.n === 1 ? ' track' : ' tracks');
+    frag.appendChild(s);
+    frag.appendChild(document.createTextNode(' '));
+  });
+  cloud.appendChild(frag);
+  info.innerHTML = '<b>' + shown.length + '</b> of ' + ARTISTS.length.toLocaleString() + ' artists · '
+    + TRACKS.toLocaleString() + ' tracks' + (ties ? ' · ties at #' + N + ' included' : '');
+  document.querySelectorAll('#seg button').forEach(b => b.classList.toggle('on', +b.dataset.n === N));
+}
+
+function useData(counts, tracks){
+  ARTISTS = aggregate(counts); TRACKS = tracks;
+  splash.style.display = 'none'; cloud.style.display = 'block';
+  render();
+}
+
+document.querySelectorAll('#seg button').forEach(b => b.addEventListener('click', () => { N = +b.dataset.n; render(); }));
+
+// ── Loading ────────────────────────────────────────────────
+const CACHE_KEY = 'rsf_artists_cache_v1';
+function saveCache(file, counts, tracks){
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ file, tracks, counts:[...counts], at:Date.now() })); } catch(e) {}
+}
+function loadCache(){
+  try { const c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); return c && c.counts ? c : null; } catch(e) { return null; }
+}
+
+const panel = $('importPanel'), dropZone = $('dropZone'), statusEl = $('importStatus');
+function setStatus(msg, cls){ statusEl.textContent = msg; statusEl.className = cls || ''; }
+
+function showManual(msg){
+  $('loadBtn').style.display = 'inline-flex';
+  if (msg) { setStatus(msg, 'err'); panel.classList.add('open'); }
+  if (cloud.style.display === 'block') return;
+  $('spIcon').textContent = '📂'; $('spTitle').textContent = 'NO PLAYLIST LOADED';
+  $('spMsg').innerHTML = 'Click <b>Load Playlist</b> to import the same <b>playlist.tsv</b> used by the playlist viewer.';
+  $('spBtn').style.display = '';
+}
+
+function processBuffer(buf, name){
+  const { counts, tracks } = parseArtists(decodeBuf(buf));
+  if (!counts.size) throw new Error('No artists found in "' + name + '".');
+  saveCache(name, counts, tracks);
+  useData(counts, tracks);
+  panel.classList.remove('open');
+  setStatus('✔ Loaded ' + tracks.toLocaleString() + ' tracks from "' + name + '"', 'ok');
+}
+function processFile(file){
+  setStatus('⏳ Reading…', '');
+  const r = new FileReader();
+  r.onload = e => { try { processBuffer(e.target.result, file.name); } catch(err) { showManual('✘ ' + err.message); } };
+  r.onerror = () => showManual('✘ Could not read file.');
+  r.readAsArrayBuffer(file);
+}
+
+$('loadBtn').addEventListener('click', () => panel.classList.toggle('open'));
+$('spBtn').addEventListener('click', () => panel.classList.add('open'));
+$('clearBtn').addEventListener('click', () => {
+  try { localStorage.removeItem(CACHE_KEY); } catch(e) {}
+  location.reload();
+});
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); e.stopPropagation(); dropZone.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) processFile(fileInput.files[0]); fileInput.value = ''; });
+// a file dropped anywhere else on the page is loaded too (instead of the browser opening it)
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]); });
+
+async function init(){
+  if (location.protocol !== 'file:') {
+    try {
+      for (const f of ['playlist.tsv','playlist.csv']) {
+        const res = await fetch(f, { cache:'no-store' });
+        if (res.ok) { processBuffer(await res.arrayBuffer(), f); return; }
+      }
+    } catch(e) {}
+  }
+  const c = loadCache();                       // opened as a local file: reuse the last loaded playlist
+  if (c) {
+    useData(new Map(c.counts), c.tracks);
+    info.innerHTML += ' · saved copy of ' + c.file + ' (' + new Date(c.at).toLocaleDateString(undefined, { day:'2-digit', month:'short', year:'numeric' }) + ')';
+    showManual();
+    return;
+  }
+  showManual();
+}
+init();
+</script>
+</body>
+</html>

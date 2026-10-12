@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <!-- TopArtists_MP3_RSF_v1.2 -->
+<!-- TopArtists_MP3_RSF_v1.4 -->
   <title>RSF Top Artists</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700&display=swap');
@@ -126,7 +126,10 @@
     <small>Same playlist.tsv / CSV used by the playlist viewer</small>
   </div>
   <div id="importStatus"></div>
-  <button class="btn" id="clearBtn" style="margin-top:10px">Clear saved copy</button>
+  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px">
+    <button class="btn" id="exportBtn">Export artists list</button>
+    <button class="btn" id="clearBtn">Clear saved copy</button>
+  </div>
 </div>
 
 <div id="splash">
@@ -142,6 +145,10 @@
 <div class="footer">interactive artist cloud &middot; &copy; 2026 [@<span style="color:var(--accent)">r</span>:<span style="color:var(--accent)">s</span><span style="color:var(--accent)">f</span>!]</div>
 
 <script>
+window.addEventListener('error', e => {
+  const t = document.getElementById('spTitle'), m = document.getElementById('spMsg');
+  if (t && m) { t.textContent = 'SCRIPT ERROR'; m.textContent = e.message + ' (line ' + e.lineno + ')'; }
+});
 // ── Settings you can tweak ─────────────────────────────────
 const DEFAULT_N    = 100;   // 50 / 100 / 200
 const INCLUDE_TIES = true;  // artists tied at the cut-off count also appear (up to +20%)
@@ -150,7 +157,9 @@ const ACRONYMS = new Set(['ATB','DFA','XTC','ELO','INXS','ABBA','KLF','AC/DC','M
 const NAME_FIX = {            // exact spelling for special cases (key = name in UPPERCASE)
   'DZIHAN & KAMIEN':'dZihan & Kamien',
   'MIDIVAL PUNDITZ':'MIDIval PunditZ',
-  'THE XX':'The XX'
+  'THE XX':'The XX',
+  "THE B-52'S":"The B-52's",
+  "JAH WOBBLE'S INVADERS OF THE HEART":"Jah Wobble's Invaders of the Heart"
 };
 const SMALL = new Set(['de','of','the','and','da','do','dos','das','du','la','le','von','van','der','y','e']);
 
@@ -212,11 +221,11 @@ function aggregate(counts){            // Map(rawName -> n)  ->  [{name,n}] (cas
     const clean = raw.replace(/\s+/g,' ').trim(), key = normKey(clean);
     if (!key) continue;
     let g = groups.get(key);
-    if (!g) { g = { n:0, best:clean, bestN:0 }; groups.set(key, g); }
-    g.n += n;
+    if (!g) { g = { n:0, best:clean, bestN:0, raws:[] }; groups.set(key, g); }
+    g.n += n; g.raws.push(clean);
     if (n > g.bestN) { g.bestN = n; g.best = clean; }
   }
-  return [...groups.values()].map(g => ({ name: smartTitle(g.best), n: g.n }));
+  return [...groups.values()].map(g => ({ name: smartTitle(g.best), n: g.n, raws: [...new Set(g.raws)] }));
 }
 
 function topN(list, N){
@@ -321,6 +330,19 @@ function processFile(file){
 
 $('loadBtn').addEventListener('click', () => panel.classList.toggle('open'));
 $('spBtn').addEventListener('click', () => panel.classList.add('open'));
+$('exportBtn').addEventListener('click', () => {
+  if (!ARTISTS.length) { setStatus('✘ Load a playlist first.', 'err'); return; }
+  const q = v => '"' + String(v).replace(/"/g, '""') + '"';
+  const rows = ARTISTS.slice().sort((a,b) => b.n - a.n || coll.compare(a.name, b.name));
+  const out = ['Artist;Tracks;Name(s) in the file'];
+  rows.forEach(a => out.push([q(a.name), a.n, q(a.raws.join(' | '))].join(';')));
+  const blob = new Blob(['\uFEFF' + out.join('\r\n')], { type:'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = 'artists_list.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  setStatus('✔ Exported ' + rows.length.toLocaleString() + ' artists (' + TRACKS.toLocaleString() + ' tracks) to artists_list.csv', 'ok');
+});
 $('clearBtn').addEventListener('click', () => {
   try { localStorage.removeItem(CACHE_KEY); } catch(e) {}
   location.reload();

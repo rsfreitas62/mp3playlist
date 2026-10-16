@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<!-- TopArtists_MP3_RSF_v1.4 -->
+<!-- TopArtists_MP3_RSF_v1.5 -->
   <title>RSF Top Artists</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700&display=swap');
@@ -111,7 +111,7 @@
   </div>
   <div class="toolbar">
     <div class="seg" id="seg">Top
-      <button data-n="50">50</button><button data-n="100" class="on">100</button><button data-n="200">200</button>
+      <button data-n="50">50</button><button data-n="100" class="on">100</button><button data-n="150">150</button><button data-n="200">200</button>
     </div>
     <button class="btn" id="loadBtn">Load Playlist</button>
     <div class="info" id="info"></div>
@@ -123,7 +123,7 @@
   <div class="import-zone" id="dropZone">
     <big>📂</big>
     <b>Click to browse</b> or drag &amp; drop<br/>
-    <small>Same playlist.tsv / CSV used by the playlist viewer</small>
+    <small>Same playlist.TSV / CSV used by the playlist viewer</small>
   </div>
   <div id="importStatus"></div>
   <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px">
@@ -150,7 +150,7 @@ window.addEventListener('error', e => {
   if (t && m) { t.textContent = 'SCRIPT ERROR'; m.textContent = e.message + ' (line ' + e.lineno + ')'; }
 });
 // ── Settings you can tweak ─────────────────────────────────
-const DEFAULT_N    = 100;   // 50 / 100 / 200
+const DEFAULT_N    = 150;   // 50 / 100 / 150 / 200
 const INCLUDE_TIES = true;  // artists tied at the cut-off count also appear (up to +20%)
 const SMART_CASE   = true;  // "THE MOODY BLUES" -> "The Moody Blues" (only when the whole name is uppercase)
 const ACRONYMS = new Set(['ATB','DFA','XTC','ELO','INXS','ABBA','KLF','AC/DC','MGMT','TLC','DJ','MC','KRS-ONE']);

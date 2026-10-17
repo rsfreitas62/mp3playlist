@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- TopArtists_MP3_RSF_v1.51 -->
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<!-- TopArtists_MP3_RSF_v1.5 -->
   <title>RSF Top Artists</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700&display=swap');
@@ -371,7 +371,7 @@ async function init(){
   const c = loadCache();                       // opened as a local file: reuse the last loaded playlist
   if (c) {
     useData(new Map(c.counts), c.tracks);
-    info.innerHTML += ' · saved copy of ' + c.file + ' (' + new Date(c.at).toLocaleDateString(undefined, { day:'2-digit', month:'short', year:'numeric' }) + ')';
+    info.innerHTML += ' · imported from: ' + c.file + ' (' + new Date(c.at).toLocaleDateString(undefined, { day:'2-digit', month:'short', year:'numeric' }) + ')';
     showManual();
     return;
   }

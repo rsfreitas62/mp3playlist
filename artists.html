@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- TopArtists_MP3_RSF_v1.54 -->
+<!-- TopArtists_MP3_RSF_v1.53 -->
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>RSF Top Artists</title>
@@ -325,7 +325,7 @@ function showTip(el){
   if (top < headH + 4) top = r.bottom + 8;       // …or below it when there is no room under the sticky header
   tip.style.left = left + 'px'; tip.style.top = (top + window.scrollY) + 'px';
   tip.style.visibility = 'visible';
-  tipTimer = setTimeout(hideTip, 4000);
+  tipTimer = setTimeout(hideTip, 3000);
 }
 // Decided by the kind of pointer that touched the screen (finger / pen), not by a media query:
 // some phone browsers wrongly claim they can "hover". A mouse never opens the balloon (it has the mouse-over).

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- TopArtists_MP3_RSF_v1.53 -->
+<!-- TopArtists_MP3_RSF_v1.54 -->
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>RSF Top Artists</title>
@@ -327,9 +327,11 @@ function showTip(el){
   tip.style.visibility = 'visible';
   tipTimer = setTimeout(hideTip, 4000);
 }
-document.addEventListener('click', e => {
+// Decided by the kind of pointer that touched the screen (finger / pen), not by a media query:
+// some phone browsers wrongly claim they can "hover". A mouse never opens the balloon (it has the mouse-over).
+document.addEventListener('pointerup', e => {
   const a = e.target.closest && e.target.closest('#cloud .a');
-  if (a && window.matchMedia('(hover: none)').matches) showTip(a); else hideTip();
+  if (a && e.pointerType && e.pointerType !== 'mouse') showTip(a); else hideTip();
 });
 
 // ── Loading ────────────────────────────────────────────────

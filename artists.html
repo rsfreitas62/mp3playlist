@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- TopArtists_MP3_RSF_v1.51 -->
+<!-- TopArtists_MP3_RSF_v1.52 -->
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>RSF Top Artists</title>
@@ -254,9 +254,14 @@ const $ = id => document.getElementById(id);
 const cloud = $('cloud'), splash = $('splash'), info = $('info'), fileInput = $('fileInput');
 
 function decodeBuf(buf){
-  const b = new Uint8Array(buf.slice(0,4));
+  const b = new Uint8Array(buf);
   if (b[0]===0xFF && b[1]===0xFE) return new TextDecoder('utf-16le').decode(buf);
   if (b[0]===0xFE && b[1]===0xFF) return new TextDecoder('utf-16be').decode(buf);
+  // UTF-16 WITHOUT a BOM (Mp3tag "Write BOM" off): text bytes alternate with 0x00 bytes
+  const n = Math.min(b.length, 2000); let even = 0, odd = 0;
+  for (let i = 0; i < n; i++) if (b[i] === 0) { if (i % 2) odd++; else even++; }
+  if (odd  > n / 8 && odd  > even * 2) return new TextDecoder('utf-16le').decode(buf);
+  if (even > n / 8 && even > odd  * 2) return new TextDecoder('utf-16be').decode(buf);
   try { return new TextDecoder('utf-8', { fatal:true }).decode(buf); }
   catch(e) { return new TextDecoder('windows-1252').decode(buf); }
 }
@@ -292,7 +297,8 @@ function useData(counts, tracks){
 document.querySelectorAll('#seg button').forEach(b => b.addEventListener('click', () => { N = +b.dataset.n; render(); }));
 
 // ── Loading ────────────────────────────────────────────────
-const CACHE_KEY = 'rsf_artists_cache_v1';
+const CACHE_KEY = 'rsf_artists_cache_v2';   // v2: ignores copies saved by the older, BOM-less misreading
+try { localStorage.removeItem('rsf_artists_cache_v1'); } catch(e) {}
 function saveCache(file, counts, tracks){
   try { localStorage.setItem(CACHE_KEY, JSON.stringify({ file, tracks, counts:[...counts], at:Date.now() })); } catch(e) {}
 }

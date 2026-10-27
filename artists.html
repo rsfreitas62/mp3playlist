@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- TopArtists_MP3_RSF_v1.54 -->
+<!-- TopArtists_MP3_RSF_v1.543 -->
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>RSF Top Artists</title>
@@ -118,7 +118,7 @@
   </div>
   <div class="toolbar">
     <div class="seg" id="seg">Top
-      <button data-n="50">50</button><button data-n="100">100</button><button data-n="150" class="on">150</button><button data-n="200">200</button>
+      <button data-n="20">20</button><button data-n="50">50</button><button data-n="100">100</button><button data-n="150" class="on">150</button><button data-n="200">200</button>
     </div>
     <button class="btn" id="loadBtn">Load Playlist</button>
     <div class="info" id="info"></div>
@@ -157,7 +157,7 @@ window.addEventListener('error', e => {
   if (t && m) { t.textContent = 'SCRIPT ERROR'; m.textContent = e.message + ' (line ' + e.lineno + ')'; }
 });
 // ── Settings you can tweak ─────────────────────────────────
-const DEFAULT_N    = 150;   // 50 / 100 / 150 / 200
+const DEFAULT_N    = 150;   // 20 / 50 / 100 / 150 / 200
 const INCLUDE_TIES = true;  // artists tied at the cut-off count also appear (up to +20%)
 const SMART_CASE   = true;  // "THE MOODY BLUES" -> "The Moody Blues" (only when the whole name is uppercase)
 const ACRONYMS = new Set(['ATB','DFA','XTC','ELO','INXS','ABBA','KLF','AC/DC','MGMT','TLC','DJ','MC','KRS-ONE']);

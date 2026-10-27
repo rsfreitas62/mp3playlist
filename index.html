@@ -606,6 +606,20 @@ function parseHTML(html) {
   return rows;
 }
 
+// "10130" -> "10,130" (anything that is not plain digits is left untouched)
+function formatCount(txt) {
+  return /^\d+$/.test(txt) ? txt.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : txt;
+}
+
+// "68,88 GB" -> "68.88 GB" (decimal comma to decimal point; "68.88 GB" is left untouched)
+function formatSize(txt) {
+  const m = txt.match(/^([\d.,]+)\s*(.*)$/);
+  if (!m) return txt;
+  let n = m[1];
+  if (n.lastIndexOf(',') > n.lastIndexOf('.')) n = n.replace(/\./g, '').replace(',', '.');
+  return n + (m[2] ? ' ' + m[2] : '');
+}
+
 // "35 days, 06:27:40" -> "35d 06h 27m 40s" (unrecognised text is left untouched)
 function formatDuration(txt) {
   const m = txt.match(/^(?:(\d+)\s*days?,?\s*)?(\d+):(\d{2}):(\d{2})$/i);
@@ -623,8 +637,8 @@ function extractHTMLStats(html) {
   const size     = tryMatch(/Total Size[^<]*<\/td>\s*<td[^>]*>([^|<]+)/i);
   const duration = tryMatch(/Total Length[^<]*<\/td>\s*<td[^>]*>([^|<]+)/i);
   const date     = tryMatch(/Date[^<]*<\/td>\s*<td[^>]*>([^|<]+)/i);
-  if (tracks)   document.getElementById('sTracks').textContent   = tracks.replace(/\|/g,'').trim();
-  if (size)     document.getElementById('sSize').textContent     = size.replace(/\|/g,'').trim();
+  if (tracks)   document.getElementById('sTracks').textContent   = formatCount(tracks.replace(/\|/g,'').trim());
+  if (size)     document.getElementById('sSize').textContent     = formatSize(size.replace(/\|/g,'').trim());
   if (duration) document.getElementById('sDuration').textContent = formatDuration(duration.replace(/\|/g,'').trim());
   if (date)     document.getElementById('sDate').textContent     = date.replace(/\|/g,'').trim();
 }
@@ -643,8 +657,8 @@ function parseDelimited(text, sep) {
     const lower = line.toLowerCase();
     if (lower.startsWith('stats')) {
       const cells = splitCSVLine(line, sep);
-      if (cells[1]) document.getElementById('sTracks').textContent   = cells[1].trim();
-      if (cells[2]) document.getElementById('sSize').textContent     = cells[2].trim();
+      if (cells[1]) document.getElementById('sTracks').textContent   = formatCount(cells[1].trim());
+      if (cells[2]) document.getElementById('sSize').textContent     = formatSize(cells[2].trim());
       if (cells[3]) document.getElementById('sDuration').textContent = formatDuration(cells[3].trim());
       const dateCell = cells[5] || cells[4]; // old files had Quality in cells[4]
       if (dateCell) document.getElementById('sDate').textContent     = dateCell.trim();

@@ -293,7 +293,7 @@ function render(){
   });
   cloud.appendChild(frag);
   info.innerHTML = '<b>' + shown.length + '</b> of ' + ARTISTS.length.toLocaleString() + ' artists · '
-    + TRACKS.toLocaleString() + ' tracks' + (ties ? ' · ties at #' + N + ' included' : '');
+    + TRACKS.toLocaleString() + ' tracks' + (ties ? ' · includes ties at #' + N + '!' : '');
   document.querySelectorAll('#seg button').forEach(b => b.classList.toggle('on', +b.dataset.n === N));
 }
 

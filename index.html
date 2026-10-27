@@ -510,7 +510,7 @@ function processFile(file) {
       }
       if (!rows || rows.length === 0) throw new Error('No data rows found.');
       loadData(rows, file.name);
-      setStatus(`✔ Loaded ${rows.length.toLocaleString()} tracks from "${file.name}"`, 'ok');
+      setStatus(`✔ Loaded ${rows.length.toLocaleString('en-US')} tracks from "${file.name}"`, 'ok');
     } catch(err) {
       setStatus('✘ ' + err.message, 'err');
     }
@@ -678,7 +678,7 @@ function parseDelimited(text, sep) {
 
   // Fallback track count if no STATS row
   if (document.getElementById('sTracks').textContent === '\u2014')
-    document.getElementById('sTracks').textContent = rows.length.toLocaleString();
+    document.getElementById('sTracks').textContent = rows.length.toLocaleString('en-US');
 
   return rows;
 }
@@ -765,8 +765,8 @@ function renderAll() {
 function updateCount() {
   const total = ALL_DATA.length, shown = filteredRows.length;
   resultCount.innerHTML = shown === total
-    ? `<b>${total.toLocaleString()}</b> tracks`
-    : `<b>${shown.toLocaleString()}</b> of ${total.toLocaleString()} tracks`;
+    ? `<b>${total.toLocaleString('en-US')}</b> tracks`
+    : `<b>${shown.toLocaleString('en-US')}</b> of ${total.toLocaleString('en-US')} tracks`;
 }
 
 // Infinite scroll sentinel
